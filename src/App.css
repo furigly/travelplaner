@@ -1,0 +1,114 @@
+/* Styles supplémentaires pour App.js */
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.App main {
+  flex-grow: 1;
+}
+
+/* Animations pour l'écran de chargement */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.98); opacity: 0.8; }
+  50% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.98); opacity: 0.8; }
+}
+
+.animate-spin {
+  animation: spin 1.5s linear infinite;
+}
+
+.animate-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Style pour l'en-tête */
+.edinburgh-header {
+  position: relative;
+  overflow: hidden;
+}
+
+.edinburgh-header:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background-image: linear-gradient(to right, #daa520, #f0ece6, #daa520);
+}
+
+/* Responsive ajustements */
+@media (max-width: 640px) {
+  .edinburgh-header h1 {
+    font-size: 1.25rem;
+  }
+  
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+/* Transitions pour les modales */
+.modal-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.modal-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.modal-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.modal-exit-active {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Optimisations pour Raspberry Pi */
+@media (max-width: 768px) {
+  .edinburgh-header:after {
+    height: 4px;
+  }
+  
+  .animate-spin {
+    animation-duration: 2s;
+  }
+  
+  .animate-pulse {
+    animation-duration: 2s;
+  }
+}
+
+/* Styles pour le mode sombre */
+@media (prefers-color-scheme: dark) {
+  .App {
+    background-color: #121212;
+    color: #f0f0f0;
+  }
+  
+  .edinburgh-header {
+    background-color: #004080;
+  }
+  
+  footer {
+    background-color: #222;
+    color: #aaa;
+  }
+}
