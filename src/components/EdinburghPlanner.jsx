@@ -563,46 +563,44 @@ const EdinburghPlanner = () => {
     };
     return stats;
   };
-  const renderTimeline = () => {
-    const filteredAndSortedEvents = sortEvents(filterEvents(state.events));
-    return (
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="timeline">
-          {(provided) => (
-            <div
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              className="timeline"
-              {filteredAndSortedEvents.map((event, index) => (
-                <Draggable
-                  key={event.id}
-                  draggableId={event.id}
-                  index={index}
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      className={`timeline-event ${
-                        snapshot.isDragging ? 'dragging' : ''
-                      }`}
-                      <EventCard
-                        event={event}
-                        onEdit={() => setEditingEvent(event)}
-                        onDelete={() => handleDeleteEvent(event.id)}
-                        weather={state.weatherData[event.date]}
-                      />
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
-    );
-  };
+const renderTimeline = () => {
+  const filteredAndSortedEvents = sortEvents(filterEvents(state.events));
+  return (
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <Droppable droppableId="timeline">
+        {(provided) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}  // Ajout des props spread
+            className="timeline"
+            {filteredAndSortedEvents.map((event, index) => (
+              <Draggable
+                key={event.id}
+                draggableId={event.id}
+                index={index}
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}    // Ajout des props spread
+                    {...provided.dragHandleProps}   // Ajout des props spread
+                    className={`timeline-event ${snapshot.isDragging ? 'dragging' : ''}`}
+                    <EventCard
+                      event={event}
+                      onEdit={() => setEditingEvent(event)}
+                      onDelete={() => handleDeleteEvent(event.id)}
+                      weather={state.weatherData[event.date]}
+                    />
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
+};
   const renderMap = () => {
     return (
       <GoogleMap
