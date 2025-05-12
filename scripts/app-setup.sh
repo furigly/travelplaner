@@ -41,7 +41,7 @@ log "Répertoire du projet: $PROJECT_ROOT"
 # Installation de Node.js
 if ! command -v node &> /dev/null; then
     log "Installation de Node.js..."
-    curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
     sudo apt install -y nodejs
 fi
 
