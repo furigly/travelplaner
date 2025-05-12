@@ -113,109 +113,51 @@ const DEFAULT_SETTINGS = {
   }
 };
 
-// Interfaces
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  time: string;
-  location: {
-    name: string;
-    address: string;
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
-  };
-  type: keyof typeof ACTIVITY_TYPES;
-  cost: number;
-  currency: keyof typeof CURRENCIES;
-  weather?: Weather;
-  notes?: string[];
-  attachments?: Attachment[];
-  rating?: number;
-  status: 'planned' | 'confirmed' | 'completed' | 'cancelled';
-  createdAt: string;
-  updatedAt: string;
-}
+/**
+ * @typedef {Object} Event
+ * @property {string} id
+ * @property {string} title
+ * @property {string} description
+ * @property {string} date
+ * @property {string} time
+ * @property {Object} location
+ * @property {string} location.name
+ * @property {string} location.address
+ * @property {Object} location.coordinates
+ * @property {number} location.coordinates.lat
+ * @property {number} location.coordinates.lng
+ * @property {string} type
+ * @property {number} cost
+ * @property {string} currency
+ * @property {Weather} [weather]
+ * @property {string[]} [notes]
+ * @property {Attachment[]} [attachments]
+ * @property {number} [rating]
+ * @property {('planned'|'confirmed'|'completed'|'cancelled')} status
+ * @property {string} createdAt
+ * @property {string} updatedAt
+ */
 
-interface Weather {
-  type: keyof typeof WEATHER_TYPES;
-  temperature: number;
-  humidity: number;
-  windSpeed: number;
-  precipitation: number;
-  description: string;
-  icon: string;
-}
+/**
+ * @typedef {Object} Weather
+ * @property {string} type
+ * @property {number} temperature
+ * @property {number} humidity
+ * @property {number} windSpeed
+ * @property {number} precipitation
+ * @property {string} description
+ * @property {string} icon
+ */
 
-interface Attachment {
-  id: string;
-  type: 'image' | 'document' | 'link';
-  url: string;
-  name: string;
-  size?: number;
-  mimeType?: string;
-}
-
-interface Budget {
-  total: number;
-  spent: number;
-  remaining: number;
-  categories: {
-    [key: string]: {
-      limit: number;
-      spent: number;
-      remaining: number;
-    };
-  };
-  currency: keyof typeof CURRENCIES;
-}
-
-interface AppState {
-  events: Event[];
-  travelDates: {
-    start: string;
-    end: string;
-  };
-  budget: Budget;
-  weatherData: {
-    [date: string]: Weather;
-  };
-  searchResults: any[];
-  selectedEvent: Event | null;
-  loading: {
-    [key: string]: boolean;
-  };
-  error: string | null;
-  notifications: Notification[];
-  settings: typeof DEFAULT_SETTINGS;
-  user: User | null;
-}
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  preferences: UserPreferences;
-  createdAt: string;
-}
-
-interface UserPreferences {
-  theme: 'light' | 'dark';
-  currency: keyof typeof CURRENCIES;
-  language: string;
-  notifications: boolean;
-}
-
-interface Notification {
-  id: string;
-  type: 'success' | 'error' | 'warning' | 'info';
-  message: string;
-  duration?: number;
-  createdAt: string;
-}
+/**
+ * @typedef {Object} Attachment
+ * @property {string} id
+ * @property {('image'|'document'|'link')} type
+ * @property {string} url
+ * @property {string} name
+ * @property {number} [size]
+ * @property {string} [mimeType]
+ */
 
 // Initial State
 const initialState: AppState = {
