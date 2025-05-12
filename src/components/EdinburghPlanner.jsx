@@ -127,24 +127,6 @@
       const lowerCaseSearch = searchTerm.toLowerCase();
       
       const dynamicResults = [
-        { 
-          name: `Highland ${searchTerm}`, 
-          type: "restaurant", 
-          duration: 100, 
-          cost: 35, 
-          address: "167 Canongate, Edinburgh EH8 8BN", 
-          transport: "Bus 6, 35",
-          rating: 4.5
-        },
-        { 
-          name: `${searchTerm} Tea Room`, 
-          type: "cafe", 
-          duration: 60, 
-          cost: 15, 
-          address: "28 Victoria St, Edinburgh EH1 2JW", 
-          transport: "Bus 23, 27, 41, 42",
-          rating: 4.0
-        }
       ];
       
       return dynamicResults;
