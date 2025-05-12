@@ -1,0 +1,125 @@
+/* Tailwind CSS directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Variables CSS personnalisées pour les couleurs du thème Édimbourg */
+:root {
+  --color-edinburgh-blue: #0065bd;
+  --color-edinburgh-dark-blue: #00437a;
+  --color-edinburgh-green: #005d2f;
+  --color-edinburgh-light-blue: #e5f1fa;
+  --color-edinburgh-stone: #f0ece6;
+  --color-edinburgh-gold: #daa520;
+}
+
+/* Styles globaux */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-edinburgh-stone);
+  color: #333;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Classes d'utilitaires personnalisées */
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-blue-600 border border-blue-600 py-2 px-4 rounded-md hover:bg-blue-50 transition;
+  }
+  
+  .btn-danger {
+    @apply bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition;
+  }
+  
+  .input-field {
+    @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow p-4;
+  }
+  
+  .section-title {
+    @apply text-lg font-semibold flex items-center mb-3;
+  }
+}
+
+/* Optimisation pour Raspberry Pi (réduire les animations) */
+@media (max-width: 768px) {
+  * {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+
+/* Styles spécifiques pour le thème d'Édimbourg */
+.edinburgh-header {
+  background-color: var(--color-edinburgh-blue);
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,90 C15,70 35,90 50,70 C65,50 85,90 100,60 L100,100 L0,100 Z" fill="%2300437a" /></svg>');
+  background-size: 100% 20px;
+  background-position: bottom;
+  background-repeat: no-repeat;
+}
+
+.calendar-day {
+  position: relative;
+}
+
+.calendar-day::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background-color: var(--color-edinburgh-blue);
+  border-radius: 4px 4px 0 0;
+}
+
+.calendar-day.has-rainy-event::after {
+  background-color: var(--color-edinburgh-light-blue);
+}
+
+/* Optimisations pour l'accessibilité */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+
+/* Adaptation pour thème sombre */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #f7f7f7;
+  }
+  
+  .card {
+    background-color: #222;
+    border: 1px solid #333;
+  }
+  
+  .input-field {
+    background-color: #333;
+    color: #f7f7f7;
+    border-color: #555;
+  }
+  
+  .calendar-day {
+    background-color: #222;
+  }
+}
