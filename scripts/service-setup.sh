@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Script de configuration des services pour le Planificateur d'Édimbourg
-# Partie du projet: https://github.com/votre-username/edinburgh-planner-raspberry
+# Partie du projet: https://github.com/furigly/travelplaner
 
 set -e
 
