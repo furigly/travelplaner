@@ -719,13 +719,14 @@ const EdinburghPlanner = () => {
     } finally {
       setLoadingWeather(false);
     }
-  }, [getDaysArray, fetchWeatherForDate, setAssistantMessages]);< weatherTypes.length; i++) {
-        cumulativeWeight += weatherWeights[i];
-        if (random <= cumulativeWeight) {
-          selectedWeather = weatherTypes[i];
-          break;
-        }
-      }
+  }, [getDaysArray, fetchWeatherForDate, setAssistantMessages]);
+         for (let i = 0; i < weatherTypes.length; i++) {
+    cumulativeWeight += weatherWeights[i];
+    if (random <= cumulativeWeight) {
+      selectedWeather = weatherTypes[i];
+      break;
+    }
+  }
       
       // Générer une température réaliste pour Édimbourg en mai (8-17°C)
       const temperature = Math.round((Math.random() * 9 + 8) * 10) / 10;
