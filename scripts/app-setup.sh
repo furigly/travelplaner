@@ -88,8 +88,8 @@ npm install --save lucide-react react-router-dom
 
 # Installation de Tailwind CSS
 log "Installation de Tailwind CSS..."
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
+#npm install -D tailwindcss postcss autoprefixer
+#npx tailwindcss init -p
 
 # Configuration de Tailwind CSS
 log "Configuration de Tailwind CSS..."
