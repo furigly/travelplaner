@@ -1,0 +1,35 @@
+/**
+ * MODÈLE pour les clés API en production
+ * 
+ * 1. Copiez ce fichier sous le nom apiKeys.production.js
+ * 2. Ajoutez vos clés API personnelles
+ * 3. Le fichier apiKeys.production.js est ignoré par Git (.gitignore)
+ */
+
+// Configuration de vos clés API
+const productionKeys = {
+  // OpenWeatherMap API - https://openweathermap.org/
+  openWeather: 'VOTRE_CLÉ_OPENWEATHERMAP_ICI',
+  
+  // Google Places API - https://developers.google.com/maps/documentation/places/web-service/overview
+  googlePlaces: 'VOTRE_CLÉ_GOOGLE_PLACES_ICI',
+  
+  // Configuration pour OpenStreetMap/Nominatim
+  osm: {
+    contactEmail: 'votre@email.com', // Recommandé pour une utilisation régulière
+    requestDelay: 1000 // en millisecondes
+  },
+  
+  // Configuration pour Ollama (IA locale)
+  ollama: {
+    // Vous pouvez personnaliser les options de l'IA ici
+    options: {
+      temperature: 0.7,
+      top_p: 0.9,
+      top_k: 40,
+      system: "Tu es un assistant de voyage spécialisé sur Édimbourg, en Écosse. Réponds de façon concise et utile en français."
+    }
+  }
+};
+
+export default productionKeys;
