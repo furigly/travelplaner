@@ -77,7 +77,7 @@ log "Initialisation du projet React..."
 cd $APP_DIR
 
 if [ ! -f "package.json" ]; then
-    npx create-react-app . --template cra-template
+    npx create-react-app@latest . --template cra-template --use-npm
 else
     log_warning "Le projet React existe déjà, ignoré l'initialisation"
 fi
