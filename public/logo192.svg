@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fond de ciel -->
+  <rect width="192" height="192" fill="#0065bd"/>
+  
+  <!-- Silhouette du château d'Édimbourg -->
+  <path d="M19,154 L173,154 L173,144 L19,144 Z" fill="#333333"/>
+  <path d="M29,144 L38,144 L38,125 L29,125 Z" fill="#333333"/>
+  <path d="M48,144 L67,144 L67,115 L48,115 Z" fill="#333333"/>
+  <path d="M77,144 L96,144 L96,106 L77,106 Z" fill="#333333"/>
+  <path d="M106,144 L125,144 L125,115 L106,115 Z" fill="#333333"/>
+  <path d="M135,144 L163,144 L163,125 L135,125 Z" fill="#333333"/>
+  
+  <!-- Tours du château -->
+  <path d="M52,115 L63,115 L63,106 L60,96 L56,96 L52,106 Z" fill="#333333"/>
+  <path d="M81,106 L92,106 L92,92 L86,83 L81,92 Z" fill="#333333"/>
+  <path d="M110,115 L121,115 L121,106 L115,96 L110,106 Z" fill="#333333"/>
+  <path d="M138,125 L159,125 L159,115 L154,106 L144,106 L138,115 Z" fill="#333333"/>
+  
+  <!-- Fenêtres -->
+  <rect x="54" y="110" width="4" height="4" fill="#f0ece6"/>
+  <rect x="84" y="100" width="4" height="4" fill="#f0ece6"/>
+  <rect x="113" y="110" width="4" height="4" fill="#f0ece6"/>
+  <rect x="144" y="119" width="4" height="4" fill="#f0ece6"/>
+  <rect x="154" y="119" width="4" height="4" fill="#f0ece6"/>
+  
+  <!-- Colline du château -->
+  <path d="M10,144 Q96,125 182,144 L182,154 L10,154 Z" fill="#005d2f"/>
+  
+  <!-- Lune dans le ciel -->
+  <circle cx="144" cy="48" r="19" fill="#f0ece6"/>
+  <circle cx="138" cy="42" r="19" fill="#0065bd"/>
+  
+  <!-- Étoiles -->
+  <circle cx="38" cy="29" r="2" fill="#f0ece6"/>
+  <circle cx="67" cy="48" r="2" fill="#f0ece6"/>
+  <circle cx="96" cy="19" r="2" fill="#f0ece6"/>
+  <circle cx="125" cy="58" r="2" fill="#f0ece6"/>
+  <circle cx="154" cy="29" r="2" fill="#f0ece6"/>
+  <circle cx="48" cy="67" r="2" fill="#f0ece6"/>
+  
+  <!-- Contour circulaire -->
+  <circle cx="96" cy="96" r="92" fill="none" stroke="#daa520" stroke-width="8"/>
+  
+  <!-- Texte "Edinburgh" en arc -->
+  <path id="textPath" d="M96,173 A77,77 0 0,1 19,96 A77,77 0 0,1 96,19 A77,77 0 0,1 173,96 A77,77 0 0,1 96,173" fill="none"/>
+  <text font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="#f0ece6">
+    <textPath href="#textPath" startOffset="15%">EDINBURGH PLANNER</textPath>
+  </text>
+</svg>
