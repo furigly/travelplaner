@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import EdinburghPlanner from './components/EdinburghPlanner';
 import logo from './assets/edinburgh-logo.svg';
-import { Settings, Info, GitHub } from 'lucide-react';
+import { Settings, Info, Github } from 'lucide-react';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
