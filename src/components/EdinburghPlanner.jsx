@@ -1,4 +1,4 @@
-{ import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Calendar, Clock, DollarSign, Bus, MapPin, Coffee, Beer, Utensils, Scissors, Search, Info, X, MessageSquare, Cloud, Sun, ChevronUp, ChevronDown, Settings, Download, FileText, Share2 } from 'lucide-react';
 
 // Gérer la recherche d'attractions
