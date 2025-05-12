@@ -735,7 +735,7 @@ const EdinburghPlanner = () => {
       const precipitationProbability = selectedWeather.includes('rain') 
         ? Math.round(Math.random() * 50 + 50) // 50-100% pour la pluie
         : Math.round(Math.random() * 30); // 0-30% sinon
-      
+}
       // Vitesse du vent (Édimbourg est assez venteux)
       const windSpeed = Math.round((Math.random() * 15 + 5) * 10) / 10;
       
