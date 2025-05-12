@@ -211,23 +211,6 @@ Réponds uniquement en français, de façon concise mais utile à ce message: "$
       }
     }
   }, []);
-          name: `${searchTerm}'s Pub`, 
-          type: "bar", 
-          duration: 90, 
-          cost: 22, 
-          address: "32 Rose St, Edinburgh EH2 2NQ", 
-          transport: "Bus 10, 11, 16",
-          rating: 4.2
-        },
-        { 
-          name: `Highland ${searchTerm}`, 
-          type: "restaurant", 
-          duration: 100, 
-          cost: 35, 
-          address: "167 Canongate, Edinburgh EH8 8BN", 
-          transport: "Bus 6, 35",
-          rating: 4.5
-        },
         { import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Calendar, Clock, DollarSign, Bus, MapPin, Coffee, Beer, Utensils, Scissors, Search, Info, X, MessageSquare, Cloud, Sun, ChevronUp, ChevronDown, Settings, Download, FileText, Share2 } from 'lucide-react';
 
