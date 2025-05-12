@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Script d'installation principal pour le Planificateur d'Édimbourg sur Raspberry Pi
-# Auteur: Nom du développeur
+# https://github.com/furigly/travelplaner
 # Version: 1.0.0
 # Licence: MIT
 
@@ -60,9 +60,13 @@ ARCH=$(uname -m)
 log "Architecture détectée: $ARCH"
 
 if [[ "$ARCH" != "aarch64" && "$ARCH" != "arm64" ]]; then
-    log_error "Cette installation n'est supportée que pour les Raspberry Pi 64 bits (aarch64/arm64)"
-    log_error "Veuillez utiliser le système d'exploitation Raspberry Pi OS 64 bits"
-    exit 1
+    log_warning "Cette installation est optimisée pour les Raspberry Pi 64 bits (aarch64/arm64)"
+    log_warning "Une installation 32 bits est possible mais certaines fonctionnalités pourraient ne pas fonctionner correctement"
+    read -p "Voulez-vous continuer quand même? (o/N) " response
+    if [[ ! "$response" =~ ^[oO]$ ]]; then
+        log_error "Installation annulée"
+        exit 1
+    fi
 fi
 
 # Obtention du chemin absolu du script
@@ -85,29 +89,55 @@ sudo apt-get update
 sudo apt-get install -y ca-certificates curl gnupg git build-essential
 
 # Exécution des scripts d'installation
-log "Installation d'Ollama..."
-bash "$SCRIPT_DIR/scripts/ollama-setup.sh"
-if [ $? -ne 0 ]; then
-    log_error "L'installation d'Ollama a échoué"
+if [ -f "$SCRIPT_DIR/scripts/ollama-setup.sh" ]; then
+    log "Installation d'Ollama..."
+    bash "$SCRIPT_DIR/scripts/ollama-setup.sh"
+    if [ $? -ne 0 ]; then
+        log_error "L'installation d'Ollama a échoué"
+        exit 1
+    fi
+    log_success "Ollama installé avec succès"
+else
+    log_error "Script d'installation d'Ollama introuvable: $SCRIPT_DIR/scripts/ollama-setup.sh"
     exit 1
 fi
-log_success "Ollama installé avec succès"
 
-log "Installation de l'application React..."
-bash "$SCRIPT_DIR/scripts/app-setup.sh"
-if [ $? -ne 0 ]; then
-    log_error "L'installation de l'application a échoué"
+if [ -f "$SCRIPT_DIR/scripts/app-setup.sh" ]; then
+    log "Installation de l'application React..."
+    bash "$SCRIPT_DIR/scripts/app-setup.sh"
+    if [ $? -ne 0 ]; then
+        log_error "L'installation de l'application a échoué"
+        exit 1
+    fi
+    log_success "Application installée avec succès"
+else
+    log_error "Script d'installation de l'application introuvable: $SCRIPT_DIR/scripts/app-setup.sh"
     exit 1
 fi
-log_success "Application installée avec succès"
 
-log "Configuration des services..."
-bash "$SCRIPT_DIR/scripts/service-setup.sh"
-if [ $? -ne 0 ]; then
-    log_error "La configuration des services a échoué"
+if [ -f "$SCRIPT_DIR/scripts/service-setup.sh" ]; then
+    log "Configuration des services..."
+    bash "$SCRIPT_DIR/scripts/service-setup.sh"
+    if [ $? -ne 0 ]; then
+        log_error "La configuration des services a échoué"
+        exit 1
+    fi
+    log_success "Services configurés avec succès"
+else
+    log_error "Script de configuration des services introuvable: $SCRIPT_DIR/scripts/service-setup.sh"
     exit 1
 fi
-log_success "Services configurés avec succès"
+
+# Configuration des assets si le script existe
+if [ -f "$SCRIPT_DIR/scripts/create-assets.sh" ]; then
+    log "Configuration des assets..."
+    bash "$SCRIPT_DIR/scripts/create-assets.sh"
+    if [ $? -ne 0 ]; then
+        log_warning "La configuration des assets a échoué, mais l'installation peut continuer"
+    else
+        log_success "Assets configurés avec succès"
+    fi
+fi
 
 # Vérification des services
 log "Vérification des services..."
@@ -145,8 +175,13 @@ echo -e "- Local: ${BLUE}http://localhost:5000${NC}"
 echo -e "- Réseau: ${BLUE}http://$IP_ADDRESS:5000${NC}"
 echo ""
 echo "Documentation:"
-echo "- Guide d'utilisation: docs/USAGE.md"
-echo "- Résolution des problèmes: docs/TROUBLESHOOTING.md"
+if [ -d "$SCRIPT_DIR/docs" ]; then
+    echo "- Guide d'installation détaillé: $SCRIPT_DIR/docs/INSTALLATION.md"
+    echo "- Options de configuration: $SCRIPT_DIR/docs/CONFIGURATION.md"
+    echo "- Résolution des problèmes: $SCRIPT_DIR/docs/TROUBLESHOOTING.md"
+else
+    echo "- Documentation en ligne: https://github.com/furigly/travelplaner"
+fi
 echo ""
 echo "Pour vérifier les statuts des services:"
 echo "sudo systemctl status ollama"
@@ -156,3 +191,17 @@ echo ""
 echo -e "${YELLOW}Note:${NC} Le premier chargement peut prendre un peu de temps car"
 echo "      le modèle d'IA doit être chargé en mémoire."
 echo ""
+
+# Offrir de lancer l'application dans le navigateur
+if command -v xdg-open &> /dev/null || command -v chromium-browser &> /dev/null; then
+    read -p "Voulez-vous ouvrir l'application dans le navigateur? (O/n) " open_browser
+    if [[ ! "$open_browser" =~ ^[nN]$ ]]; then
+        if command -v xdg-open &> /dev/null; then
+            xdg-open "http://localhost:5000"
+        elif command -v chromium-browser &> /dev/null; then
+            chromium-browser "http://localhost:5000"
+        fi
+    fi
+fi
+
+exit 0
