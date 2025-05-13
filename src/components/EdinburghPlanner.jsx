@@ -1,4 +1,747 @@
-<input
+return (
+    <div className="flex flex-col p-2 sm:p-4 max-w-full relative">
+      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center">Planificateur de Voyage à Édimbourg</h1>
+      
+      {/* Boutons d'outils flottants */}
+      <div className="fixed z-20 bottom-4 md:bottom-6 right-4 md:right-6 flex flex-col space-y-2">
+        <button 
+          className="p-2 md:p-3 rounded-full shadow-lg bg-green-600 text-white"
+          onClick={() => setShowExportPanel(!showExportPanel)}
+          title="Exporter/Importer"
+          aria-label="Exporter ou importer un planning"
+        >
+          <FileText size={20} />
+        </button>
+        
+        <button 
+          className="p-2 md:p-3 rounded-full shadow-lg bg-purple-600 text-white"
+          onClick={() => setShowSettings(!showSettings)}
+          title="Paramètres"
+          aria-label="Paramètres de l'application"
+        >
+          <Settings size={20} />
+        </button>
+        
+        <button 
+          className={`p-2 md:p-3 rounded-full shadow-lg ${showAssistant ? 'bg-red-500' : 'bg-blue-600'} text-white`}
+          onClick={() => setShowAssistant(!showAssistant)}
+          title="Assistant IA"
+          aria-label={showAssistant ? "Fermer l'assistant" : "Ouvrir l'assistant"}
+        >
+          {showAssistant ? <X size={20} /> : <MessageSquare size={20} />}
+        </button>
+      </div>
+      
+      {/* Panneau d'exportation/importation */}
+      {showExportPanel && (
+        <div className="fixed z-10 bottom-20 right-4 md:right-6 w-72 sm:w-80 bg-white rounded-lg shadow-xl border border-gray-200">
+          <div className="flex justify-between items-center p-3 border-b border-gray-200 bg-green-600 text-white rounded-t-lg">
+            <h3 className="font-medium text-sm sm:text-base">Exporter / Importer</h3>
+            <button onClick={() => setShowExportPanel(false)} aria-label="Fermer le panneau d'exportation">
+              <X size={18} />
+            </button>
+          </div>
+          
+          <div className="p-4 space-y-3">
+            <div>
+              <button
+                onClick={exportData}
+                className="w-full flex items-center justify-center bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition"
+              >
+                <Download size={16} className="mr-2" />
+                Exporter mon planning
+              </button>
+              <p className="text-xs text-gray-500 mt-1">
+                Sauvegardez votre planning dans un fichier JSON
+              </p>
+            </div>
+            
+            <div className="border-t border-gray-200 pt-3">
+              <input
+                type="file"
+                accept=".json"
+                ref={fileInputRef}
+                onChange={importData}
+                className="hidden"
+                aria-label="Sélectionner un fichier à importer"
+              />
+              <button
+                onClick={() => fileInputRef.current.click()}
+                className="w-full flex items-center justify-center bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition"
+              >
+                <Share2 size={16} className="mr-2" />
+                Importer un planning
+              </button>
+              <p className="text-xs text-gray-500 mt-1">
+                Chargez un planning préalablement exporté
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
+        {/* Calendrier */}
+        <div className="w-full lg:w-3/4">
+          <div className="bg-gray-50 rounded-lg p-3 sm:p-4 shadow">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 flex items-center">
+              <Calendar className="mr-2" size={20} />
+              Programme du {formatDate(new Date(travelDates.start))} au {formatDate(new Date(travelDates.end))}
+            </h2>
+            
+            <div className="space-y-4 sm:space-y-6">
+              {getDaysArray().map((date, index) => (
+                <div key={index} className="border-b pb-4 last:border-b-0">
+                  <h3 className="text-lg font-medium mb-2 bg-blue-50 p-2 rounded flex justify-between items-center">
+                    <span>{formatDate(date)}</span>
+                    {weatherData[date.toISOString().split('T')[0]] ? (
+                      <div 
+                        className="flex items-center space-x-1 text-sm cursor-pointer"
+                        onClick={() => setShowWeatherDetails(prev => ({
+                          ...prev, 
+                          [date.toISOString().split('T')[0]]: !prev[date.toISOString().split('T')[0]]
+                        }))}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Voir les détails météo pour le ${formatDate(date)}`}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            setShowWeatherDetails(prev => ({
+                              ...prev, 
+                              [date.toISOString().split('T')[0]]: !prev[date.toISOString().split('T')[0]]
+                            }));
+                          }
+                        }}
+                      >
+                        {getWeatherIcon(weatherData[date.toISOString().split('T')[0]].type)}
+                        <span className="text-gray-600">{weatherData[date.toISOString().split('T')[0]].temperature}°C</span>
+                        {showWeatherDetails[date.toISOString().split('T')[0]] ? 
+                          <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      </div>
+                    ) : (
+                      <button 
+                        className="text-xs text-blue-600 hover:text-blue-800 flex items-center"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          fetchWeatherForDate(date.toISOString().split('T')[0]);
+                        }}
+                        disabled={loadingWeather}
+                        aria-label="Voir la météo"
+                      >
+                        {loadingWeather ? "Chargement..." : "Voir météo"}
+                      </button>
+                    )}
+                  </h3>
+                  
+                  {/* Détails météo */}
+                  {weatherData[date.toISOString().split('T')[0]] && showWeatherDetails[date.toISOString().split('T')[0]] && (
+                    <div className="mb-3 p-2 bg-blue-50 rounded-md text-sm">
+                      <p>
+                        <span className="font-medium">Prévision:</span> {weatherData[date.toISOString().split('T')[0]].description}
+                      </p>
+                      <p>
+                        <span className="font-medium">Précipitations:</span> {weatherData[date.toISOString().split('T')[0]].precipitationProbability}% de chance
+                      </p>
+                      <p>
+                        <span className="font-medium">Vent:</span> {weatherData[date.toISOString().split('T')[0]].windSpeed} km/h
+                      </p>
+                      <p className="italic text-xs mt-1 text-blue-700">
+                        {weatherData[date.toISOString().split('T')[0]].recommendation}
+                      </p>
+                    </div>
+                  )}
+                  
+                  <div className="space-y-2">
+                    {getEventsForDate(date).length === 0 ? (
+                      <p className="text-gray-500 italic">Aucun événement prévu</p>
+                    ) : (
+                      getEventsForDate(date).map(event => (
+                        <div 
+                          key={event.id}
+                          className={`flex flex-col p-3 border rounded-md ${event.weather && event.weather.type.includes('rain') ? 'border-blue-300 bg-blue-50' : 'hover:bg-gray-50'}`}
+                        >
+                          <div className="flex justify-between">
+                            <div className="flex items-center">
+                              <div className="mr-2 p-1 bg-blue-100 rounded">
+                                {event.isTravel 
+                                  ? <span className="text-xl">{travelMethods.find(m => m.id === event.travelMethod)?.icon || "🚶"}</span>
+                                  : getEventIcon(event.type)
+                                }
+                              </div>
+                              <div>
+                                <h4 className="font-medium">{event.title}</h4>
+                                <p className="text-sm text-gray-600">{event.address}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-start">
+                              {event.weather && (
+                                <div className="mr-2" title={event.weather.description}>
+                                  {getWeatherIcon(event.weather.type)}
+                                </div>
+                              )}
+                              <button 
+                                onClick={() => handleDeleteEvent(event.id)}
+                                className="text-red-500 hover:text-red-700"
+                                aria-label={`Supprimer l'événement ${event.title}`}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          </div>
+                          
+                          <div className="flex mt-2 text-sm text-gray-600 space-x-4">
+                            <span className="flex items-center">
+                              <Clock size={14} className="mr-1" />
+                              {formatTime(event.startTime)} - {formatTime(event.endTime)} ({event.duration} min)
+                            </span>
+                            
+                            {!event.isTravel && (
+                              <span className="flex items-center">
+                                <DollarSign size={14} className="mr-1" />
+                                {convertCost(event.cost)} {getCurrencySymbol()}
+                              </span>
+                            )}
+                            
+                            {event.isTravel ? (
+                              <span className="flex items-center">
+                                {travelMethods.find(m => m.id === event.travelMethod)?.icon || "🚶"} {event.travelDistance} km
+                              </span>
+                            ) : event.transport ? (
+                              <span className="flex items-center">
+                                <Bus size={14} className="mr-1" />
+                                {event.transport}
+                              </span>
+                            ) : null}
+                          </div>
+                          
+                          {event.notes && (
+                            <p className="mt-1 text-sm italic">{event.notes}</p>
+                          )}
+                          
+                          {event.weather && event.weather.type.includes('rain') && (
+                            <p className="mt-1 text-xs text-blue-700 italic">{event.weather.recommendation}</p>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-4 p-3 bg-blue-50 rounded flex flex-col space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-sm">Coût total estimé:</span>
+                <span className="font-bold">{calculateTotalCost()} {getCurrencySymbol()}</span>
+              </div>
+              
+              {events.length > 0 && (
+                <div className="flex justify-between items-center text-xs sm:text-sm">
+                  <span className="text-gray-600">Durée d'activités:</span>
+                  <span className="text-gray-800">
+                    {Math.floor(events.reduce((total, event) => total + event.duration, 0) / 60)} h {events.reduce((total, event) => total + event.duration, 0) % 60} min
+                  </span>
+                </div>
+              )}
+              
+              {events.length > 0 && (
+                <div className="flex justify-between items-center text-xs sm:text-sm">
+                  <span className="text-gray-600">Trajets:</span>
+                  <span className="text-gray-800">
+                    {events.filter(e => e.isTravel).length} ({events.filter(e => e.isTravel).reduce((total, event) => total + event.travelDistance, 0).toFixed(1)} km)
+                  </span>
+                </div>
+              )}
+              
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <button
+                  onClick={() => setShowAssistant(true)}
+                  className="flex items-center justify-center bg-white text-blue-600 border border-blue-600 py-1 sm:py-2 px-2 sm:px-4 rounded-md hover:bg-blue-50 transition text-xs sm:text-sm"
+                  aria-label="Afficher l'assistant IA"
+                >
+                  <MessageSquare size={14} className="mr-1 sm:mr-2" />
+                  <span className="truncate">Assistant IA</span>
+                </button>
+                
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    fetchWeatherForDate(travelDates.start).then(() => {
+                      // Après avoir récupéré la météo du premier jour, récupérer pour les autres jours
+                      const dates = getDaysArray.map(date => date.toISOString().split('T')[0]);
+                      dates.slice(1).forEach(date => fetchWeatherForDate(date));
+                      
+                      // Ajouter un message de l'assistant
+                      setAssistantMessages(prevMessages => [
+                        ...prevMessages, 
+                        { 
+                          text: "J'ai récupéré les prévisions météo pour votre séjour ! Cliquez sur les icônes météo pour voir les détails.", 
+                          sender: "assistant" 
+                        }
+                      ]);
+                      setShowAssistant(true);
+                    });
+                  }}
+                  className="flex items-center justify-center bg-white text-gray-600 border border-gray-600 py-1 sm:py-2 px-2 sm:px-4 rounded-md hover:bg-gray-50 transition text-xs sm:text-sm"
+                  disabled={loadingWeather}
+                  aria-label="Charger les prévisions météo pour tous les jours"
+                >
+                  <Cloud size={14} className="mr-1 sm:mr-2" />
+                  <span className="truncate">{loadingWeather ? "Chargement..." : "Voir météo"}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Formulaire d'ajout */}
+        <div className="w-full lg:w-1/4">
+          <div className="bg-gray-50 rounded-lg p-3 sm:p-4 shadow sticky top-4">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Ajouter un événement</h2>
+            
+            {/* Sélection du type d'événement (normal ou trajet) */}
+            <div className="mb-3 sm:mb-4">
+              <div className="flex space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setNewEvent(prev => ({...prev, isTravel: false}))}
+                  className={`flex-1 py-1 sm:py-2 px-2 sm:px-3 rounded-md text-sm ${!newEvent.isTravel ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                  aria-pressed={!newEvent.isTravel}
+                  aria-label="Ajouter une activité"
+                >
+                  Activité
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNewEvent(prev => ({...prev, isTravel: true, title: 'Trajet', cost: 0}))}
+                  className={`flex-1 py-1 sm:py-2 px-2 sm:px-3 rounded-md text-sm ${newEvent.isTravel ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                  aria-pressed={newEvent.isTravel}
+                  aria-label="Ajouter un trajet"
+                >
+                  Trajet
+                </button>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              {/* Formulaire pour les trajets */}
+              {newEvent.isTravel ? (
+                <>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700" htmlFor="travelMethod">Mode de transport</label>
+                    <select
+                      id="travelMethod"
+                      value={newEvent.travelMethod}
+                      onChange={(e) => setNewEvent(prev => ({...prev, travelMethod: e.target.value}))}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border text-sm"
+                    >
+                      {travelMethods.map(method => (
+                        <option key={method.id} value={method.id}>
+                          {method.icon} {method.name} ({method.speed} km/h)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700" htmlFor="travelDistance">Distance (km)</label>
+                    <input
+                      id="travelDistance"
+                      type="number"
+                      value={newEvent.travelDistance}
+                      onChange={(e) => setNewEvent(prev => ({...prev, travelDistance: Math.max(0.1, parseFloat(e.target.value) || 0)}))}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border text-sm"
+                      min="0.1"
+                      step="0.1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700" htmlFor="travelTitle">Titre du trajet</label>
+                    <input
+                      id="travelTitle"
+                      type="text"
+                      value={newEvent.title}
+                      onChange={(e) => setNewEvent(prev => ({...prev, title: e.target.value}))}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border text-sm"
+                      placeholder="ex: Trajet vers Edinburgh Castle"
+                    />
+                  </div>
+                  
+                  <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded">
+                    Durée estimée: {newEvent.duration} minutes
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700" htmlFor="searchTerm">Chercher un lieu</label>
+                    <div className="relative">
+                      <div className="flex">
+                        <input
+                          id="searchTerm"
+                          type="text"
+                          value={searchTerm}
+                          onChange={(e) => handleSearch(e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border text-sm"
+                          placeholder="Rechercher une attraction..."
+                          aria-label="Rechercher une attraction"
+                        />
+                        <button 
+                          type="button"
+                          className="ml-2 mt-1 p-2 bg-gray-100 rounded-md border"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (searchTerm.length >= 2) {
+                              setShowSearchResults(!showSearchResults);
+                            }
+                          }}
+                          aria-label="Rechercher"
+                        >
+                          <Search size={16} />
+                        </button>
+                      </div>
+                      
+                      {showSearchResults && (
+                        <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg max-h-52 sm:max-h-60 overflow-auto" role="listbox">
+                          {isSearching && searchResults.length === 0 && (
+                            <div className="p-2 text-center text-gray-500 text-sm">
+                              Recherche en cours...
+                            </div>
+                          )}
+                          
+                          {!isSearching && searchResults.length === 0 && (
+                            <div className="p-2 text-center text-gray-500 text-sm">
+                              Aucun résultat trouvé. Essayez un autre terme.
+                            </div>
+                          )}
+                          
+                          {searchResults.map((attraction, index) => (
+                            <div 
+                              key={index} 
+                              className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
+                              onClick={() => {
+                                setNewEvent(prev => ({
+                                  ...prev,
+                                  title: attraction.name,
+                                  duration: attraction.duration,
+                                  cost: attraction.cost,
+                                  type: attraction.type,
+                                  address: attraction.address,
+                                  transport: attraction.transport
+                                }));
+                                setSearchTerm('');
+                                setShowSearchResults(false);
+                              }}
+                              role="option"
+                              aria-selected="false"
+                              tabIndex={0}
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  setNewEvent(prev => ({
+                                    ...prev,
+                                    title: attraction.name,
+                                    duration: attraction.duration,
+                                    cost: attraction.cost,
+                                    type: attraction.type,
+                                    address: attraction.address,
+                                    transport: attraction.transport
+                                  }));
+                                  setSearchTerm('');
+                                  setShowSearchResults(false);
+                                }
+                              }}
+                            >
+                              <div className="flex justify-between">
+                                <span className="font-medium">{attraction.name}</span>
+                                <span className="text-xs text-gray-500">
+                                  {attraction.duration} min | {attraction.cost}€
+                                </span>
+                              </div>
+                              <div className="text-xs text-gray-500">{attraction.address}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-1 text-xs text-gray-500 flex items-center">
+                      <Info size={12} className="mr-1" />
+                      Recherchez pour obtenir durée et coût moyens
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700" htmlFor="eventTitle">Titre</label>
+                    <input
+                      id="eventTitle"
+                      type="text"
+                      value={newEvent.title}
+                      onChange={(e) => setNewEvent(prev => ({...prev, title: e.target.value}))}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border text-sm"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700" htmlFor="eventType">Type</label>
+                    <select
+                      id="eventType"
+                      value={newEvent.type}
+                      onChange={(e) => setNewEvent(prev => ({...prev, type: e.target.value}))}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border text-sm"
+                    >
+                      {eventTypes.map(type => (
+                        <option key={type.id} value={type.id}>{type.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700" htmlFor="eventCost">Coût (€)</label>
+                    <input
+                      id="eventCost"
+                      type="number"
+                      value={newEvent.cost}
+                      onChange={(e) => setNewEvent(prev => ({...prev, cost: parseFloat(e.target.value) || 0}))}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border text-sm"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700" htmlFor="eventAddress">Adresse</label>
+                    <input
+                      id="eventAddress"
+                      type="text"
+                      value={newEvent.address}
+                      onChange={(e) => setNewEvent(prev => ({...prev, address: e.target.value}))}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border text-sm"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700" htmlFor="eventTransport">Transport</label>
+                    <input
+                      id="eventTransport"
+                      type="text"
+                      value={newEvent.transport}
+                      onChange={(e) => setNewEvent(prev => ({...prev, transport: e.target.value}))}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border text-sm"
+                      placeholder="ex: Bus 35, Marche 15min"
+                    />
+                  </div>
+                </>
+              )}
+              
+              {/* Champs communs aux deux types d'événements */}
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700" htmlFor="eventDate">Date</label>
+                <select
+                  id="eventDate"
+                  value={newEvent.date}
+                  onChange={(e) => setNewEvent(prev => ({...prev, date: e.target.value}))}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border text-sm"
+                >
+                  {getDaysArray().map((date, index) => (
+                    <option key={index} value={date.toISOString().split('T')[0]}>
+                      {formatDate(date)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="flex space-x-2">
+                <div className="flex-1">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700" htmlFor="eventStartTime">Heure</label>
+                  <input
+                    id="eventStartTime"
+                    type="time"
+                    value={newEvent.startTime}
+                    onChange={(e) => setNewEvent(prev => ({...prev, startTime: e.target.value}))}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border text-sm"
+                  />
+                </div>
+                
+                <div className="flex-1">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700" htmlFor="eventDuration">Durée (min)</label>
+                  <input
+                    id="eventDuration"
+                    type="number"
+                    value={newEvent.duration}
+                    onChange={(e) => setNewEvent(prev => ({...prev, duration: Math.max(0, parseInt(e.target.value) || 0)}))}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border text-sm"
+                    min="0"
+                    disabled={newEvent.isTravel}
+                  />
+                </div>
+              </div>
+              
+              {!newEvent.isTravel && (
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700" htmlFor="eventNotes">Notes</label>
+                  <textarea
+                    id="eventNotes"
+                    value={newEvent.notes}
+                    onChange={(e) => setNewEvent(prev => ({...prev, notes: e.target.value}))}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border text-sm"
+                    rows="2"
+                  />
+                </div>
+              )}
+              
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleAddEvent();
+                }}
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition text-sm"
+                disabled={!newEvent.title}
+                aria-label="Ajouter au planning"
+              >
+                Ajouter au planning
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Panneau de paramètres */}
+      {showSettings && (
+        <div className="fixed z-10 bottom-20 right-4 md:right-6 w-72 sm:w-80 bg-white rounded-lg shadow-xl border border-gray-200">
+          <div className="flex justify-between items-center p-3 border-b border-gray-200 bg-purple-600 text-white rounded-t-lg">
+            <h3 className="font-medium text-sm sm:text-base">Paramètres</h3>
+            <button onClick={() => setShowSettings(false)} aria-label="Fermer les paramètres">
+              <X size={18} />
+            </button>
+          </div>
+          
+          <div className="p-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="currencySelect">Devise</label>
+              <select
+                id="currencySelect"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                className="block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+              >
+                <option value="EUR">Euro (€)</option>
+                <option value="GBP">Livre Sterling (£)</option>
+                <option value="USD">Dollar américain ($)</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Les coûts seront convertis dans la devise choisie
+              </p>
+            </div>
+            
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Dates du voyage</label>
+              <div className="flex space-x-2">
+                <div>
+                  <label className="block text-xs text-gray-500" htmlFor="startDate">Début</label>
+                  <input
+                    id="startDate"
+                    type="date"
+                    value={travelDates.start}
+                    onChange={(e) => setTravelDates(prev => ({...prev, start: e.target.value}))}
+                    className="block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500" htmlFor="endDate">Fin</label>
+                  <input
+                    id="endDate"
+                    type="date"
+                    value={travelDates.end}
+                    onChange={(e) => setTravelDates(prev => ({...prev, end: e.target.value}))}
+                    className="block w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Assistant IA */}
+      {showAssistant && (
+        <div className="fixed z-10 bottom-20 right-4 md:right-6 w-72 sm:w-80 md:w-96 bg-white rounded-lg shadow-xl border border-gray-200">
+          <div className="flex justify-between items-center p-2 sm:p-3 border-b border-gray-200 bg-blue-600 text-white rounded-t-lg">
+            <h3 className="font-medium text-sm sm:text-base">Assistant IA pour Édimbourg</h3>
+            <button onClick={() => setShowAssistant(false)} aria-label="Fermer l'assistant">
+              <X size={18} />
+            </button>
+          </div>
+          
+          <div className="h-64 sm:h-80 overflow-y-auto p-2 sm:p-3">
+            {assistantMessages.map((msg, index) => (
+              <div 
+                key={index} 
+                className={`mb-2 ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}
+              >
+                <div 
+                  className={`inline-block p-2 rounded-lg max-w-[85%] text-sm sm:text-base ${
+                    msg.sender === 'user' 
+                      ? 'bg-blue-100 text-blue-800' 
+                      : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+            {assistantThinking && (
+              <div className="text-left mb-2">
+                <div className="inline-block p-2 rounded-lg bg-gray-100 text-gray-500">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+          
+          <div className="p-2 sm:p-3 border-t border-gray-200">
+            <div className="flex">
+              <input
+                type="text"
+                value={userMessage}
+                onChange={(e) => setUserMessage(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAssistantResponse(e);
+                  }
+                }}
+                placeholder="Posez une question..."
+                className="flex-grow p-2 border rounded-l-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+                aria-label="Message à l'assistant"
+              />
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleAssistantResponse(e);
+                }}
+                className="bg-blue-600 text-white p-2 rounded-r-md hover:bg-blue-700"
+                aria-label="Envoyer le message"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default EdinburghPlanner;              <input
                 type="text"
                 value={userMessage}
                 onChange={(e) => setUserMessage(e.target.value)}
@@ -710,6 +1453,55 @@ const EdinburghPlanner = () => {
     
     // Ajouter le message de l'utilisateur à la conversation
     setAssistantMessages(prevMessages => [...prevMessages, { text: userMessage, sender: "user" }]);
+    setUserMessage("");
+    setAssistantThinking(true);
+    
+    // Simuler un délai pour "réfléchir"
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    let response = "";
+    const lowerCaseMessage = userMessage.toLowerCase();
+    
+    // Analyser le message et générer une réponse appropriée
+    if (lowerCaseMessage.includes("bonjour") || lowerCaseMessage.includes("salut") || lowerCaseMessage.includes("hello")) {
+      response = "Bonjour ! Comment puis-je vous aider à planifier votre séjour à Édimbourg ?";
+    } else if (lowerCaseMessage.includes("météo") || lowerCaseMessage.includes("temps") || lowerCaseMessage.includes("climat")) {
+      response = "En mai, la température moyenne à Édimbourg est d'environ 12°C avec des maximales autour de 15°C. C'est généralement un mois agréable, mais prévoyez toujours un imperméable car les averses sont fréquentes en Écosse !";
+    } else if (lowerCaseMessage.includes("transport") || lowerCaseMessage.includes("déplacer") || lowerCaseMessage.includes("bus")) {
+      response = "Édimbourg est une ville très praticable à pied, surtout dans le centre. Pour des distances plus longues, le réseau de bus Lothian est excellent et propose des billets journaliers à environ 5£. Les taxis sont également disponibles mais plus coûteux.";
+    } else if (lowerCaseMessage.includes("budget") || lowerCaseMessage.includes("coût") || lowerCaseMessage.includes("cher")) {
+      response = "Un budget moyen pour Édimbourg serait d'environ 100-150€ par jour et par personne, incluant l'hébergement, les repas et quelques attractions. Si vous visitez plusieurs sites payants, pensez au Royal Edinburgh Ticket qui offre un accès à 3 attractions majeures.";
+    } else if (lowerCaseMessage.includes("restaurant") || lowerCaseMessage.includes("manger") || lowerCaseMessage.includes("cuisine")) {
+      response = "Pour goûter à la cuisine écossaise traditionnelle, je vous recommande 'The Albanach' sur Royal Mile ou 'Whiski Bar & Restaurant'. Pour un repas plus gastronomique, 'The Witchery' près du château offre une expérience unique. N'oubliez pas d'essayer le haggis, plat national écossais !";
+    } else if (lowerCaseMessage.includes("château") || lowerCaseMessage.includes("castle")) {
+      response = "Edinburgh Castle est l'attraction la plus populaire de la ville. Prévoyez environ 2 heures pour la visite. Je vous conseille d'arriver tôt (ouverture à 9h30) pour éviter les foules. N'oubliez pas d'assister au tir du canon de 13h, une tradition depuis 1861 !";
+    } else if (lowerCaseMessage.includes("royal mile")) {
+      response = "La Royal Mile est l'artère principale de la vieille ville. Elle relie le château à Holyrood Palace. En vous promenant, vous découvrirez de nombreuses boutiques, pubs et attractions comme St Giles Cathedral. Prenez le temps d'explorer les 'closes' (ruelles) qui partent de chaque côté.";
+    } else if (lowerCaseMessage.includes("whisky") || lowerCaseMessage.includes("whiskey")) {
+      response = "Pour découvrir le whisky écossais, je vous recommande 'The Scotch Whisky Experience' près du château ou 'Cadenhead's Whisky Shop' pour des bouteilles uniques. Les pubs comme 'The Bow Bar' proposent également de belles sélections de single malts à déguster.";
+    } else if (lowerCaseMessage.includes("arthur") || lowerCaseMessage.includes("arthur's seat")) {
+      response = "Arthur's Seat est un ancien volcan qui offre une vue panoramique sur la ville. Comptez environ 1h-1h30 pour l'ascension et prévoyez de bonnes chaussures. Le lever ou le coucher du soleil sont des moments magiques pour cette randonnée, si la météo le permet !";
+    } else if (
+      events.length > 0 && 
+      (lowerCaseMessage.includes("journée") || lowerCaseMessage.includes("programme") || lowerCaseMessage.includes("suggestion") || lowerCaseMessage.includes("recommande"))
+    ) {
+      // Analyse du programme actuel
+      const today = new Date().toISOString().split('T')[0];
+      const nextDay = events.find(e => e.date >= today)?.date || travelDates.start;
+      response = suggestActivities(nextDay);
+    } else {
+      // Réponse générique basée sur les événements déjà planifiés
+      if (events.length === 0) {
+        response = "Je vois que vous n'avez pas encore ajouté d'activités à votre planning. Souhaitez-vous des suggestions pour commencer ? Edinburgh Castle et la Royal Mile sont incontournables pour une première visite.";
+      } else {
+        const nextDay = travelDates.start;
+        response = `Vous avez déjà prévu ${events.length} activités pour votre séjour. ${suggestActivities(nextDay)} N'hésitez pas à me demander des recommandations spécifiques pour vos centres d'intérêt !`;
+      }
+    }
+    
+    setAssistantThinking(false);
+    setAssistantMessages(prevMessages => [...prevMessages, { text: userMessage, sender: "user" }, { text: response, sender: "assistant" }]);
+  }, [userMessage, events, travelDates.start, suggestActivities]);istantMessages(prevMessages => [...prevMessages, { text: userMessage, sender: "user" }]);
     setUserMessage("");
     setAssistantThinking(true);
     
